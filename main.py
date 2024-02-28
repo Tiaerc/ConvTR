@@ -46,8 +46,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--Batch_size", type=int, default=256, nargs="?", help="Batch size.")
     parser.add_argument("--epochs", type=int, default=400, nargs="?", help="epochs")
-    parser.add_argument("--nc", type=int, default=180, nargs="?", help="Channel")
-    parser.add_argument("--TR_ranks", type=int, default=40, nargs="?", help="TR-ranks")
+    parser.add_argument("--nc", type=int, default=80, nargs="?", help="Channel")
+    parser.add_argument("--TR_ranks", type=int, default=20, nargs="?", help="TR-ranks")
     parser.add_argument("--model", type=int, default=2, nargs="?", help="计算方法")
     parser.add_argument("--input_dropout", type=float, default=0.26694419227220374, nargs="?", help="Input layer dropout.")
     parser.add_argument("--hidden_dropout", type=float, default=0.2, nargs="?", help="Hidden layer dropout.")
@@ -60,19 +60,16 @@ if __name__ == "__main__":
     # torch.manual_seed(seed)
     # torch.cuda.manual_seed_all(seed)
 
-    # shape = torch.tensor((185, 290, 30))
-    shape = torch.tensor((144, 176, 30))
-    # shape = torch.tensor((256, 256, 30))
-    HSI_data_train= HSIDataset('video30/suzie.mat', 0.12, 0.9, 0.1, 'train')
-    HSI_data_test = HSIDataset('video30/suzie.mat', 0.12, 0.9, 0.1, 'test')
+
+    shape = torch.tensor((256, 256, 30))
+    HSI_data_train= HSIDataset('video30/suzie.mat', 0.11, 0.9, 0.1, 'train')
+    HSI_data_test = HSIDataset('video30/suzie.mat', 0.11, 0.9, 0.1, 'test')
 
     # shape = torch.tensor((256, 256, 3))
-    # HSI_data_train= HSIDataset('airplane.mat', 0.17, 0.9, 0.1, 'train')
-    # HSI_data_test = HSIDataset('airplane.mat', 0.17, 0.9, 0.1, 'test')
+    # HSI_data_train= HSIDataset('airplane.mat', 0.167, 0.9, 0.1, 'train')
+    # HSI_data_test = HSIDataset('airplane.mat', 0.167, 0.9, 0.1, 'test')
 
-    # shape = torch.tensor((256, 256, 11))
-    # HSI_data_train= HSIDataset('WashtonDC.mat', 0.01, 0.9, 0.1, 'train')
-    # HSI_data_test = HSIDataset('WashtonDC.mat', 0.01, 0.9, 0.1, 'test')
+
     
     # 构建DataLoader
     # HSI_loader = DataLoader(dataset=HSI_data, batch_size=args.Batch_size,shuffle=True)
@@ -80,7 +77,7 @@ if __name__ == "__main__":
     HSI_loader_test = DataLoader(dataset=HSI_data_test, batch_size=args.Batch_size,shuffle=True)
 
     model = TRDnet(shape, args.TR_ranks, args.nc, args.model, **kwargs) 
-    model = model.cuda() #第一句话
+    model = model.cuda() 
 
     # opt = torch.optim.SGD(model.parameters(), lr=1e-3,weight_decay=1e-2)
     opt = torch.optim.Adam(model.parameters(), lr=1e-3)
@@ -94,11 +91,10 @@ if __name__ == "__main__":
         rmse_te, mae_te, mape_te, rse_te= 0, 0, 0, 0
 
         model.train()
-        # 取训练集的数据进行修正
         for idex, label in HSI_loader_train:
 
-            idex = idex.cuda() #第二句话
-            label = label.cuda() #第三句话
+            idex = idex.cuda() 
+            label = label.cuda() 
             
             out = model(idex, args.TR_ranks) 
             # myloss = MyLoss()
@@ -127,9 +123,7 @@ if __name__ == "__main__":
             
 
         if (i % 5) == 0:
-            # 保存参数
             # torch.save(model.state_dict(), "./out/model_2.pyt")
-            # 保存整个模型
             # torch.save(model, "./Picture/Airplane/mr0.85/r20_nc180_dr0.2_.pyt")
             torch.save(model, "./video_result/mr0.90/suzie_r40_nc180_dr0.1_.pyt")
             
