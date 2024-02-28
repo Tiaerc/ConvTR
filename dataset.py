@@ -16,13 +16,9 @@ class HSIDataset(Dataset):
     # mode取值为: full train test
     def __init__(self, mat_path, rate, train_rate, test_rate, mode):
         super().__init__()
-        # self.data = torch.from_numpy(sio.loadmat(mat_path)['X']/1.0) #suzie
-        self.data = torch.from_numpy(sio.loadmat(mat_path)['X_GT']/1.0) #suzie
-        # self.data = torch.from_numpy(sio.loadmat(mat_path)['temp']/150.0) #wdc
-        # self.data = torch.from_numpy(sio.loadmat(mat_path)['Lena']/255.0)
-        # self.data = torch.from_numpy(sio.loadmat(mat_path)['img']/255.0)
-        # self.data = torch.from_numpy(sio.loadmat(mat_path)['Lena'])
-        # self.data = torch.from_numpy(sio.loadmat(mat_path)['X']/1000.0)
+
+        self.data = torch.from_numpy(sio.loadmat(mat_path)['Lena']/255.0)
+
         self.total_size = 1
         self.shape_list = []
         for s in self.data.shape:
@@ -41,14 +37,7 @@ class HSIDataset(Dataset):
             HSIDataset.train_idx = random.sample(HSIDataset.class_idx, self.train_size)
         if HSIDataset.test_idx == None:
             HSIDataset.test_idx = list(set(HSIDataset.class_idx) - set(HSIDataset.train_idx))
-            # print("train已经打印")
 
-        # if self.class_idx == None:
-        #     self.class_idx = random.sample(range(self.total_size), self.size)
-        # if self.train_idx == None:
-        #     self.train_idx = random.sample(self.class_idx, self.train_size)
-        # if self.test_idx == None:
-        #     self.test_idx = list(set(self.class_idx) - set(self.train_idx))
             
 
         # print("break point")
@@ -85,9 +74,7 @@ class HSIDataset(Dataset):
         else:
             return self.size
 
-# if __name__ == "__main__":
-#     train_data = HSI('WashtonDC(30-285,500-755,30-40).mat', 0.1)
-#     print(train_data[128])
+
 # if __name__ == "__main__":
 #     HSI_data_train= HSIDataset('Lena_256.mat', 0.9, 0.9, 0.1, 'train')
 #     print(HSI_data_train[128])
