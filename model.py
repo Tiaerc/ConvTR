@@ -22,48 +22,11 @@ class TRDnet(torch.nn.Module):
         self.input_dropout = torch.nn.Dropout(kwargs["input_dropout"])
         self.hidden_dropout = torch.nn.Dropout(kwargs["hidden_dropout"])
         self.bne = torch.nn.BatchNorm2d(nc)
-
-        #传统2层 先(R,R)  
-        # self.conv2d_1 = torch.nn.Conv2d(1, nc, kernel_size=(ranks,ranks), stride = ranks)
-        # self.conv2d_2 = torch.nn.Conv2d(nc, nc, kernel_size=(1, len(shape)))
         
-        #传统2层 先(1,N)
-        # self.conv2d_1 = torch.nn.Conv2d(1, nc, kernel_size=(1, len(shape)), stride = [1, len(shape)])
-        # self.conv2d_2 = torch.nn.Conv2d(nc, nc, kernel_size=(ranks,ranks))
-
-        # #先(1,N) 3层
-        # self.conv2d_1 = torch.nn.Conv2d(1, nc, kernel_size=(1, len(shape)), stride = [1, len(shape)])
-        # self.conv2d_2 = torch.nn.Conv2d(nc, nc, kernel_size=(ranks//2,ranks//2),stride = ranks//2)
-        # self.conv2d_3 = torch.nn.Conv2d(nc, nc, kernel_size=(2,2))
-
-        #先(1,N) 5层
-        # self.conv2d_1 = torch.nn.Conv2d(1, nc, kernel_size=(1, len(shape)), stride = [1, len(shape)])
-        # self.conv2d_2 = torch.nn.Conv2d(nc, nc, kernel_size=(ranks//4,ranks//4),stride = ranks//4)
-        # self.conv2d_3 = torch.nn.Conv2d(nc, nc, kernel_size=(2,2))
-        # self.conv2d_4 = torch.nn.Conv2d(nc, nc, kernel_size=(2,2))
-        # self.conv2d_5 = torch.nn.Conv2d(nc, nc, kernel_size=(2,2))
-
-        # #先(R,R) 4层  目前效果好
-        # self.conv2d_1 = torch.nn.Conv2d(1, nc, kernel_size=(ranks//2,ranks//2), stride = ranks//2)
-        # self.conv2d_2 = torch.nn.Conv2d(nc, nc, kernel_size=(1, len(shape)))
-        # self.conv2d_3 = torch.nn.Conv2d(nc, nc, kernel_size=(2, 2),stride = 2)
-        # self.conv2d_4 = torch.nn.Conv2d(nc, nc, kernel_size=(1, 2))
-
-        #先(R,R) 4层 
         self.conv2d_1 = torch.nn.Conv2d(1, nc, kernel_size=(ranks//2,ranks//2), stride = ranks//2)
         self.conv2d_2 = torch.nn.Conv2d(nc, nc, kernel_size=(1, len(shape)))
         self.conv2d_3 = torch.nn.Conv2d(nc, nc, kernel_size=(2, 2))
         self.conv2d_4 = torch.nn.Conv2d(nc, nc, kernel_size=(1, len(shape)))
-
-        # #先(R,R) 5/6层 
-        # self.conv2d_1 = torch.nn.Conv2d(1, nc, kernel_size=(ranks//4,ranks//4), stride = ranks//4)
-        # self.conv2d_2 = torch.nn.Conv2d(nc, nc, kernel_size=(1, len(shape)))
-        # self.conv2d_3 = torch.nn.Conv2d(nc, nc, kernel_size=(2, 2))
-        # self.conv2d_4 = torch.nn.Conv2d(nc, nc, kernel_size=(1, len(shape)), stride = [1, len(shape)])
-        # # self.conv2d_5 = torch.nn.Conv2d(nc, nc, kernel_size=(2, 2))
-        # # self.conv2d_6 = torch.nn.Conv2d(nc, nc, kernel_size=(2, 2))
-        # self.conv2d_5 = torch.nn.Conv2d(nc, nc, kernel_size=(3, 3))
-
         self.flatten = torch.nn.Flatten()
         self.linear1 = torch.nn.Linear(in_features=nc, out_features=(nc//2))
         self.linear2 = torch.nn.Linear(in_features=(nc//2), out_features=1)
@@ -74,8 +37,8 @@ class TRDnet(torch.nn.Module):
 
         conv_Z = list()
         conv_Z_exist = False
-        # tol_z = list() #用来储存batch_size个idex的切片
-        for i in range(len(idex)):  #i=batch_size
+        # tol_z = list() 
+        for i in range(len(idex)): 
             N1 = self.N1(idex[i][0])
             N2 = self.N2(idex[i][1])
             N3 = self.N3(idex[i][2])
@@ -96,43 +59,25 @@ class TRDnet(torch.nn.Module):
             pass
         
         if self.model == 2:
-            #复原方法二：仿照CoSTCo
-            # 1
             rst = self.conv2d_1(conv_Z)
             rst = self.bne(rst)
             rst = F.relu(rst)
-
-            # 2
+            
             rst = self.hidden_dropout(rst)
             rst = self.conv2d_2(rst) 
             # rst = self.bne(rst)
             rst = F.relu(rst)   
 
-            # 3
             rst = self.hidden_dropout(rst)
             rst = self.conv2d_3(rst)  
             # rst = self.bne(rst)
             rst = F.relu(rst)   
             
-            # 4
             # rst = self.hidden_dropout(rst)
             rst = self.conv2d_4(rst)  
             # rst = self.bne(rst)
             rst = F.relu(rst)   
-
-            # # 5
-            # # rst = self.hidden_dropout(rst)
-            # rst = self.conv2d_5(rst)  
-            # # rst = self.bne(rst)
-            # rst = F.relu(rst)   
-
-            # # 6
-            # rst = self.hidden_dropout(rst)    
-            # rst = self.conv2d_6(rst)  
-            # # rst = self.bne(rst)
-            # rst = F.relu(rst)  
-
-            # rst = self.hidden_dropout(rst)    
+ 
             rst = self.flatten(rst) 
             rst = self.linear1(rst) 
             rst = F.relu(rst)
